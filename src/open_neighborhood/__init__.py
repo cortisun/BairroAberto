@@ -1,9 +1,9 @@
-# Open Neighborhood - experimental off-lot furnishing preview (v0.5.0)
+# BairroAberto - experimental off-lot furnishing preview (v0.5.1)
 #
-# Read-only diagnostics. Nothing here calls native functions or changes game state.
+# Commands may capture objects and spawn one experimental preview when requested.
 # The import itself is wrapped so a failure is logged instead of breaking the loader.
 
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 
 try:
     from open_neighborhood import diag as _diag

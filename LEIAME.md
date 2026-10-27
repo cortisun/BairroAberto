@@ -1,4 +1,4 @@
-# OpenNeighborhood v0.5.0 — experimento de mobília entre lotes
+# BairroAberto v0.5.1 — experimento de mobília entre lotes
 
 Projeto original para tentar transformar bairros de **The Sims 4** em espaços
 contínuos como em The Sims 3: visitar casas comuns de vizinhos, sem tela de
@@ -7,7 +7,7 @@ portas, Sims e caminhos jogáveis), não apenas a vizinhança decorativa.
 
 **Estado atual: protótipo experimental, NÃO é um mod de bairro aberto.**
 
-A v0.5.0 acrescenta o primeiro teste de criação real de objeto: visita-se uma
+A v0.5.0 acrescentou o primeiro teste de criação real de objeto: visita-se uma
 casa vizinha normalmente uma vez, salva-se uma lista limitada de seus objetos,
 volta-se ao lote de origem e pede-se que o mod tente recriar **um objeto** na
 posição original que ele ocupava no mundo. O resultado pode não aparecer ou
@@ -20,8 +20,11 @@ ser rejeitado pelo motor do jogo. Nenhuma casa inteira é importada.
 - `v0.4.0`: investiga APIs nativas e classes de lote/zona com inspeção estática.
 - `v0.5.0`: captura objetos do lote visitado e oferece pré-visualização manual
   de **um** objeto na zona ativa, com comando de limpeza.
+- `v0.5.1`: corrige flags expostas pelo jogo como funções e prioriza
+  `ObjectManager.get_all()` na captura; descreve motivos de descarte.
 
-As tags Git preservam cada uma dessas versões. Não temos um arquivo v0.1.0,
+As branches `versoes/v...` preservam cada uma dessas versões no GitHub.
+Não temos um arquivo v0.1.0,
 por isso a linha do tempo começa na v0.2.0.
 
 ## Compilar no Windows
@@ -38,7 +41,7 @@ por isso a linha do tempo começa na v0.2.0.
 O ZIP de **código-fonte não vai diretamente em Mods**. Ele serve para gerar
 `.ts4script` compatível com Python 3.7. O script não depende da Community Library.
 
-## Teste da v0.5.0 (somente numa CÓPIA do save)
+## Teste da v0.5.1 (somente numa CÓPIA do save)
 
 **Risco experimental:** duplicatas podem permanecer gravadas se você salvar
 durante o teste ou se o jogo encerrar antes da limpeza. Faça backup de `saves`,
@@ -48,7 +51,7 @@ Não deixe crianças / Sims importantes interagirem com o preview.
 1. Entre normalmente na casa do vizinho que quer abrir. O deslocamento
    inicial ainda tem tela de carregamento.
 2. Abra o console (`Ctrl + Shift + C`) e digite `on.status` para confirmar a
-   versão `0.5.0`.
+   versão `0.5.1`.
 3. Ainda dentro da casa vizinha, execute `on.capture_neighbor`.
 4. Volte para sua casa normalmente e execute `on.captured`. A lista completa,
    com índices dos móveis, ficará em `Mods\OpenNeighborhood_diag.txt`.

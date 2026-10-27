@@ -4,7 +4,7 @@ Objetivo final: sair do lote de casa, caminhar até casas comuns do mesmo
 bairro e visitar seus interiores sem tela de carregamento, com experiência
 parecida com The Sims 3.
 
-## Estado atual: v0.5.0 (primeiro preview experimental)
+## Estado atual: v0.5.1 (captura de móveis corrigida; preview experimental)
 
 - Identificar zona atual, IDs dos lotes vizinhos e registros do ZoneManager.
 - Mapear quais dados persistidos são acessíveis sem viajar.

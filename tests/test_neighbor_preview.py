@@ -11,7 +11,8 @@ from unittest import mock
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATH = os.path.join(ROOT, "src", "open_neighborhood", "neighbor_preview.py")
 
-fake_diag = types.SimpleNamespace(_mods_dir=lambda: "", log_exception=lambda *a: None)
+fake_diag = types.SimpleNamespace(_mods_dir=lambda: "", log_exception=lambda *a: None,
+                                  log=lambda *a: None)
 fake_package = types.ModuleType("open_neighborhood")
 fake_package.diag = fake_diag
 with mock.patch.dict(sys.modules, {"open_neighborhood": fake_package}):
@@ -52,6 +53,17 @@ class MockServices:
         return self.objects
 
 
+class MockGameManager:
+    def __init__(self, objs):
+        self.objs = objs
+
+    def get_all(self):
+        return iter(self.objs)
+
+    def values(self):
+        raise AssertionError("get_all should be preferred for this manager")
+
+
 class PreviewTests(unittest.TestCase):
     def tearDown(self):
         preview._preview_objects = []
@@ -61,6 +73,29 @@ class PreviewTests(unittest.TestCase):
         self.assertEqual(data["source_zone_id"], 100)
         self.assertEqual(len(data["objects"]), 1)
         self.assertEqual(data["objects"][0]["definition_id"], 123)
+
+    def test_method_flags_are_called_instead_of_treated_as_true(self):
+        chair = MockObject()
+        chair.is_sim = lambda: False
+        chair.is_in_inventory = lambda: False
+        self.assertIsNotNone(preview.snapshot_object(chair))
+        chair.is_in_inventory = lambda: True
+        self.assertIsNone(preview.snapshot_object(chair))
+
+    def test_get_all_object_manager_is_supported(self):
+        services = MockServices()
+        chair = MockObject()
+        chair.is_sim = lambda: False
+        chair.is_in_inventory = lambda: False
+        services.objects = MockGameManager([chair])
+        data = preview.capture(services)
+        self.assertEqual(len(data["objects"]), 1)
+
+    def test_empty_manager_has_actionable_failure(self):
+        services = MockServices()
+        services.objects = MockGameManager([])
+        with self.assertRaisesRegex(ValueError, "examinados=0 via get_all"):
+            preview.capture(services)
 
     def test_snapshot_rejects_corrupt_position(self):
         self.assertIsNone(preview.snapshot_object(MockObject(pos=(float("nan"), 0, 0))))

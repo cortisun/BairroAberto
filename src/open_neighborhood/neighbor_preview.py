@@ -39,42 +39,89 @@ def _integer(value):
 
 
 def _is_sim_or_attached(obj):
-    if getattr(obj, "is_sim", False):
+    # Some TS4 versions expose these flags as methods, not properties. A bound
+    # method is always truthy, which incorrectly rejected EVERY object in 0.5.0.
+    if _flag(obj, "is_sim"):
         return True
     if getattr(obj, "parent", None) is not None:
         return True
-    if getattr(obj, "is_in_inventory", False):
+    if _flag(obj, "is_in_inventory"):
         return True
     return False
 
 
-def snapshot_object(obj):
+def _flag(obj, name):
+    value = getattr(obj, name, False)
+    if callable(value):
+        try:
+            value = value()
+        except Exception:
+            # Do not treat an uncallable/unsupported optional flag as True.
+            # Remaining validation still excludes objects without transforms.
+            return False
+    return bool(value)
+
+
+def _objects_from_manager(manager):
+    """Get placed objects via the API offered by this game's ObjectManager."""
+    getter = getattr(manager, "get_all", None)
+    if callable(getter):
+        try:
+            objects = getter()
+            if objects is not None:
+                return objects, "get_all"
+        except Exception as exc:
+            diag.log("ObjectManager.get_all unavailable:", type(exc).__name__)
+    getter = getattr(manager, "values", None)
+    if callable(getter):
+        return getter(), "values"
+    raise ValueError("ObjectManager nao oferece get_all nem values")
+
+
+def snapshot_object(obj, rejected=None):
     """Return purely serializable object data or None for unsuitable objects."""
+    def skip(reason):
+        if rejected is not None:
+            rejected[reason] = rejected.get(reason, 0) + 1
+        return None
+
     try:
         if _is_sim_or_attached(obj):
-            return None
-        definition_id = _integer(obj.definition.id)
+            return skip("sim_ou_anexado")
+        definition = getattr(obj, "definition", None)
+        raw_id = getattr(definition, "id", None)
+        if raw_id is None:
+            raw_id = getattr(obj, "definition_id", 0)
+        definition_id = _integer(raw_id)
         if not definition_id:
-            return None
-        location = obj.location
-        transform = location.transform
-        position = transform.translation
-        rotation = transform.orientation
+            return skip("sem_definicao")
+        location = getattr(obj, "location", None)
+        transform = getattr(location, "transform", None)
+        if transform is None:
+            transform = getattr(obj, "transform", None)
+        if transform is None:
+            return skip("sem_transform")
+        position = getattr(transform, "translation", None)
+        rotation = getattr(transform, "orientation", None)
+        if position is None or rotation is None:
+            return skip("sem_posicao_ou_rotacao")
         routing_surface = getattr(location, "routing_surface", None)
+        if routing_surface is None:
+            routing_surface = getattr(obj, "routing_surface", None)
         level = _integer(getattr(routing_surface, "secondary_id", 0))
         surface_type = _integer(getattr(routing_surface, "type", 0))
         if level > 10 or surface_type > 100:
-            return None
+            return skip("superficie_invalida")
         coords = [_number(getattr(position, key)) for key in ("x", "y", "z")]
         quaternion = [_number(getattr(rotation, key)) for key in ("x", "y", "z", "w")]
         if sum(x*x for x in quaternion) < 0.01:
-            return None
+            return skip("rotacao_invalida")
         label = str(obj)
         return {"definition_id": definition_id, "position": coords,
                 "rotation": quaternion, "level": level,
                 "surface_type": surface_type, "label": label[:100]}
     except (AttributeError, TypeError, ValueError, OverflowError):
-        return None
+        return skip("campo_incompativel")
 
 
 def capture(services):
@@ -84,10 +131,14 @@ def capture(services):
     neighborhood_id = _integer(zone.neighborhood_id)
     world_id = _integer(zone.world_id)
     manager = services.object_manager()
+    candidates, source = _objects_from_manager(manager)
     objects = []
     skipped = 0
-    for obj in manager.values():
-        record = snapshot_object(obj)
+    scanned = 0
+    reasons = {}
+    for obj in candidates:
+        scanned += 1
+        record = snapshot_object(obj, reasons)
         if record is None:
             skipped += 1
             continue
@@ -95,7 +146,11 @@ def capture(services):
         if len(objects) >= MAX_OBJECTS:
             break
     if not objects:
-        raise ValueError("nenhum objeto elegivel encontrado no lote atual")
+        raise ValueError("nenhum objeto elegivel; examinados={} via {}; motivos={}".format(
+            scanned, source, reasons))
+    diag.log("capture scan:", "api={}".format(source),
+             "examined={}".format(scanned), "eligible={}".format(len(objects)),
+             "skipped={}".format(skipped), "reasons={}".format(reasons))
     return {"format": FORMAT_VERSION, "source_zone_id": current_id,
             "neighborhood_id": neighborhood_id, "world_id": world_id,
             "objects": objects, "skipped": skipped}

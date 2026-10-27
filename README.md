@@ -4,7 +4,7 @@ Projeto de mod de script **em desenvolvimento** para explorar um bairro
 contínuo em The Sims 4: caminhar até as casas comuns dos vizinhos e visitá-las
 sem telas de carregamento, como em The Sims 3.
 
-**Ainda não é um mundo aberto funcional.** A versão experimental atual, 0.5.0,
+**Ainda não é um mundo aberto funcional.** A versão experimental atual, 0.5.1,
 pode registrar definições e posições de móveis enquanto o jogador visita um
 lote e tentar recriar **um único objeto** fora do lote ativo depois. Paredes,
 portas, moradores, roteamento e visitas realmente sem loading ainda não foram
@@ -20,6 +20,7 @@ O histórico do repositório contém commits sequenciais para:
 | 0.3.0 | Identificação e inspeção de lotes vizinhos | [`versoes/v0.3.0`](../../tree/versoes/v0.3.0) |
 | 0.4.0 | Inspeção segura de APIs de lote e zona | [`versoes/v0.4.0`](../../tree/versoes/v0.4.0) |
 | 0.5.0 | Captura e preview experimental de um móvel | [`versoes/v0.5.0`](../../tree/versoes/v0.5.0) |
+| 0.5.1 | Corrige a detecção de móveis no ObjectManager | [`versoes/v0.5.1`](../../tree/versoes/v0.5.1) |
 
 O código mais antigo disponível é a versão 0.2.0. Caminhos pessoais foram
 anonimizados ao importar seu arquivo de instruções antigo. Arquivos de log
@@ -45,7 +46,8 @@ crash ou se o jogo for salvo antes da limpeza.
 
 ## Estado mais recente dos testes
 
-O log recebido da v0.5.0 confirma carregamento com Python 3.7, mas ainda não
-contém a execução dos comandos `on.capture_neighbor`, `on.captured`,
-`on.preview_one` nem `on.preview_cleanup`. Consulte
+Uma captura de tela da v0.5.0 mostrou que `on.capture_neighbor` descartou todos
+os objetos; por isso `on.captured` e `on.preview_one` não encontraram o arquivo
+de captura. A v0.5.1 ajusta as verificações e informa os motivos de descarte
+em caso de nova falha. Consulte
 [notas técnicas](docs/NOTAS_TECNICAS.md) para o histórico dos experimentos.

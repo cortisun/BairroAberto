@@ -41,6 +41,20 @@ no GitHub, pois podem conter caminhos e informações de um computador pessoal.
   `class_api`, mas nenhuma entrada `capture_neighbor`, `captured`,
   `preview_one` ou `preview_cleanup`. Portanto, ainda não há evidência
   suficiente para afirmar que o teste de criação de móveis funcionou.
+- Em uma captura de tela posterior, o comando `on.capture_neighbor` falhou
+  informando que nenhum objeto era elegível. Como a captura não gerou arquivo,
+  `on.captured` e `on.preview_one` acusaram arquivo ausente. O comando de
+  limpeza informou zero objetos, como esperado após nenhum preview criado.
+
+## 0.5.1
+
+- Corrige a avaliação de flags (`is_sim` e `is_in_inventory`) quando fornecidas
+  como métodos. Na versão anterior, métodos vinculados podiam ser tratados
+  incorretamente como `True`, descartando todos os objetos.
+- Prioriza `ObjectManager.get_all()` e usa `values()` como alternativa.
+- Se a captura ainda retornar zero móveis, apresenta número de objetos
+  examinados e categorias de rejeição para permitir uma correção específica.
+- A correção ainda precisa ser validada dentro do The Sims 4.
 
 ## Questão central ainda em aberto
 
