@@ -5,7 +5,7 @@ import sys
 
 import sims4.commands
 
-from open_neighborhood import diag, probe
+from open_neighborhood import diag, probe, introspection
 
 LIVE = sims4.commands.CommandType.Live
 
@@ -169,3 +169,34 @@ def inspect_zone(target_zone_id: int = 0, _connection=None):
     except Exception as exc:
         output("inspect failed: {!r}".format(exc))
         diag.log_exception("inspect", exc)
+
+
+@sims4.commands.Command("open_neighborhood.native_info", "on.native_info", command_type=LIVE)
+def native_info(module_name: str = "_buildbuy", symbol_name: str = "get_zones_cached_objects", _connection=None):
+    """Report signatures and docs; DOES NOT execute any native function."""
+    output = _out(_connection)
+    try:
+        report = introspection.native_info(sys.modules, module_name, symbol_name)
+        diag.log("native_info:", *report)
+        for line in report:
+            output(line)
+        output("relatorio: {}".format(diag.log_path()))
+    except Exception as exc:
+        output("native_info failed: {!r}".format(exc))
+        diag.log_exception("native_info", exc)
+
+
+@sims4.commands.Command("open_neighborhood.class_api", "on.class_api", command_type=LIVE)
+def class_api(_connection=None):
+    """List relevant descriptors on the loaded zone/lot classes, without calling them."""
+    output = _out(_connection)
+    try:
+        import services
+        report = introspection.class_info(services.current_zone())
+        diag.log("class_api:", *report)
+        for line in report[:12]:
+            output(line)
+        output("relatorio completo: {}".format(diag.log_path()))
+    except Exception as exc:
+        output("class_api failed: {!r}".format(exc))
+        diag.log_exception("class_api", exc)

@@ -110,6 +110,7 @@ def overview(services):
     lines.append("lotes_no_bairro={}; limite_relatorio={}".format(total, MAX_LOTS))
     if total:
         lines.append("campos_proto_lote=" + ", ".join(fields(lots[0])))
+    lines.append("ZoneManager indica registros, nao interiores necessariamente carregados")
     for lot in lots[:MAX_LOTS] if lots is not None else ():
         target_id = safe_attr(lot, "zone_instance_id")
         target_num = None
@@ -118,8 +119,8 @@ def overview(services):
         except (ValueError, TypeError):
             pass
         loaded = "?" if manager_ids is None else str(target_num in manager_ids)
-        lines.append("zona={} lote={} ativo={} instanciado={}".format(
-            target_id, safe_attr(lot, "lot_instance_id"),
+        lines.append("zona={} descricao={} ativo={} no_ZoneManager={}".format(
+            target_id, safe_attr(lot, "lot_description_id"),
             target_num == current, loaded))
     if total > MAX_LOTS:
         lines.append("[{} lotes omitidos]".format(total - MAX_LOTS))
@@ -147,7 +148,7 @@ def inspect_neighbor(services, target_id):
     if target is None:
         return lines + ["zona nao encontrada no bairro atual"]
     manager_ids, error = _manager_ids(services)
-    lines.append("instanciada={} (True significa zona presente no ZoneManager)".format(
+    lines.append("no_ZoneManager={} (nao prova que o interior esteja carregado)".format(
         "?" if manager_ids is None else int(target_id) in manager_ids))
     if error:
         lines.append(error)

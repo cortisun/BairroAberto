@@ -82,12 +82,12 @@ class ProbeTests(unittest.TestCase):
     def test_overview_distinguishes_loaded_from_neighbor(self):
         report = "\n".join(probe.overview(self.services))
         self.assertIn("lotes_no_bairro=2", report)
-        self.assertIn("zona=11 lote=101 ativo=True instanciado=True", report)
-        self.assertIn("zona=22 lote=202 ativo=False instanciado=False", report)
+        self.assertIn("zona=11 descricao=<ausente> ativo=True no_ZoneManager=True", report)
+        self.assertIn("zona=22 descricao=<ausente> ativo=False no_ZoneManager=False", report)
 
     def test_inspect_neighbor_does_not_load_it(self):
         report = "\n".join(probe.inspect_neighbor(self.services, 22))
-        self.assertIn("instanciada=False", report)
+        self.assertIn("no_ZoneManager=False", report)
         self.assertIn("lot_instance_id=202", report)
         self.assertIn("campos_do_registro=zone_instance_id, lot_instance_id", report)
 
