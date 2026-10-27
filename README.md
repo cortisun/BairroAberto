@@ -49,5 +49,7 @@ crash ou se o jogo for salvo antes da limpeza.
 Uma captura de tela da v0.5.0 mostrou que `on.capture_neighbor` descartou todos
 os objetos; por isso `on.captured` e `on.preview_one` não encontraram o arquivo
 de captura. A v0.5.1 ajusta as verificações e informa os motivos de descarte
-em caso de nova falha. Consulte
+em caso de nova falha. Em teste posterior, a v0.5.1 **capturou 132 objetos** e
+registrou **uma criação e remoção bem-sucedidas** na simulação. Ainda falta
+comprovar que a cópia aparece e pode ser usada fora do lote ativo. Consulte
 [notas técnicas](docs/NOTAS_TECNICAS.md) para o histórico dos experimentos.

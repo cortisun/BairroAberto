@@ -54,7 +54,19 @@ no GitHub, pois podem conter caminhos e informações de um computador pessoal.
 - Prioriza `ObjectManager.get_all()` e usa `values()` como alternativa.
 - Se a captura ainda retornar zero móveis, apresenta número de objetos
   examinados e categorias de rejeição para permitir uma correção específica.
-- A correção ainda precisa ser validada dentro do The Sims 4.
+- Teste dentro do The Sims 4 confirmado em 27/10/2026: foram examinados **280**
+  objetos e **132** foram capturados. Os **148** restantes eram Sims ou objetos
+  anexados, conforme o filtro atual.
+- A primeira execução de `on.preview_one 0` foi bloqueada porque o ID da zona
+  ativa ainda coincidia com o ID capturado. `on.preview_cleanup` informou
+  `removed=0`, comportamento esperado nesse caso.
+- Em uma segunda tentativa, `on.preview_one 0` confirmou a criação de um novo
+  objeto com ID de instância. Depois `on.preview_cleanup` confirmou
+  `removed=1, remaining=0`. Portanto, criação e remoção foram exercitadas
+  pelo motor do jogo, mas **a renderização visual e a possibilidade de
+  interação fora do lote ativo ainda não foram confirmadas**.
+- A conclusão acima usa apenas um resumo do log; o log original e os IDs do
+  save não foram incluídos no repositório público.
 
 ## Questão central ainda em aberto
 
