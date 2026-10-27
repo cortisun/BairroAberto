@@ -5,7 +5,7 @@ import sys
 
 import sims4.commands
 
-from open_neighborhood import diag, probe, introspection
+from open_neighborhood import diag, probe, introspection, neighbor_preview
 
 LIVE = sims4.commands.CommandType.Live
 
@@ -200,3 +200,69 @@ def class_api(_connection=None):
     except Exception as exc:
         output("class_api failed: {!r}".format(exc))
         diag.log_exception("class_api", exc)
+
+
+@sims4.commands.Command("open_neighborhood.capture_neighbor", "on.capture_neighbor", command_type=LIVE)
+def capture_neighbor(_connection=None):
+    """When physically visiting a neighbor, record its movable object definitions."""
+    output = _out(_connection)
+    try:
+        import services
+        data = neighbor_preview.capture(services)
+        destination = neighbor_preview.save_capture(data)
+        output("Capturados {} objetos da zona {}.".format(
+            len(data["objects"]), data["source_zone_id"]))
+        output("Agora volte normalmente para sua casa e use on.captured.")
+        diag.log("capture_neighbor:", "count={}".format(len(data["objects"])),
+                 "source_zone_id={}".format(data["source_zone_id"]),
+                 "file={}".format(destination))
+    except Exception as exc:
+        output("capture_neighbor falhou: {!r}".format(exc))
+        diag.log_exception("capture_neighbor", exc)
+
+
+@sims4.commands.Command("open_neighborhood.captured", "on.captured", command_type=LIVE)
+def captured(_connection=None):
+    """List recorded furniture to select the index for a single preview."""
+    output = _out(_connection)
+    try:
+        data = neighbor_preview.load_capture()
+        output("Zona capturada: {} | objetos: {}".format(
+            data["source_zone_id"], len(data["objects"])))
+        report = []
+        for index, item in enumerate(data["objects"]):
+            line = "  {}: definition={} pos={} {}".format(
+                index, item["definition_id"], item["position"], item["label"])
+            report.append(line)
+        for line in report[:12]:
+            output(line)
+        diag.log("captured:", *report)
+        output("Lista completa no OpenNeighborhood_diag.txt")
+    except Exception as exc:
+        output("captured falhou: {!r}".format(exc))
+        diag.log_exception("captured", exc)
+
+
+@sims4.commands.Command("open_neighborhood.preview_one", "on.preview_one", command_type=LIVE)
+def preview_one(index: int = 0, _connection=None):
+    """Explicitly test spawning ONE neighbor object at its off-lot coordinate."""
+    output = _out(_connection)
+    try:
+        import services
+        data = neighbor_preview.load_capture()
+        obj = neighbor_preview.preview_one(data, index, services)
+        output("Objeto experimental criado (ID {}). NAO SALVE. Use on.preview_cleanup.".format(
+            _safe(lambda: obj.id)))
+        diag.log("preview_one:", "index={}".format(index), "id={}".format(_safe(lambda: obj.id)))
+    except Exception as exc:
+        output("preview_one falhou: {!r}".format(exc))
+        diag.log_exception("preview_one", exc)
+
+
+@sims4.commands.Command("open_neighborhood.preview_cleanup", "on.preview_cleanup", command_type=LIVE)
+def preview_cleanup(_connection=None):
+    """Attempt removal of all objects created by THIS preview feature."""
+    output = _out(_connection)
+    removed, remaining = neighbor_preview.cleanup()
+    output("Previews removidos: {} | nao removidos: {}".format(removed, remaining))
+    diag.log("preview_cleanup:", "removed={}".format(removed), "remaining={}".format(remaining))

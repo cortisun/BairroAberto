@@ -1,9 +1,9 @@
-# Open Neighborhood - diagnostic prototype (v0.4.0)
+# Open Neighborhood - experimental off-lot furnishing preview (v0.5.0)
 #
 # Read-only diagnostics. Nothing here calls native functions or changes game state.
 # The import itself is wrapped so a failure is logged instead of breaking the loader.
 
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 
 try:
     from open_neighborhood import diag as _diag

@@ -4,18 +4,20 @@ Objetivo final: sair do lote de casa, caminhar até casas comuns do mesmo
 bairro e visitar seus interiores sem tela de carregamento, com experiência
 parecida com The Sims 3.
 
-## Estado atual: v0.4.0 (investigação)
+## Estado atual: v0.5.0 (primeiro preview experimental)
 
 - Identificar zona atual, IDs dos lotes vizinhos e registros do ZoneManager.
 - Mapear quais dados persistidos são acessíveis sem viajar.
 - Inspecionar metadados (não chamar) de APIs nativas e classes de zona/lote.
-- Testar os comandos em um save descartável; receber log do usuário.
+- Capturar um subconjunto de móveis do lote vizinho quando ele estiver ativo.
+- Tentar criar uma cópia de um móvel fora do lote atual e removê-la em seguida.
+- Validar os comandos e o descarte dos previews num save descartável.
 
 ## Experimentos futuros, dependentes dos resultados
 
-1. **Objetos e geometria:** testar, em isolamento, se móveis e paredes da casa
-   vizinha podem ser representados na área carregada, sem viajar. Não é
-   garantido que uma casa vista de fora tenha todos os dados carregados.
+1. **Objetos e geometria:** validar o preview de **um móvel**, depois ampliar
+   para conjuntos de móveis e geometria de paredes. Não é garantido que um
+   objeto de outro lote seja renderizado ou interativo na zona atual.
 2. **Portas e roteamento:** testar uma interação de visita e descobrir se o Sim
    consegue percorrer o trajeto até um interior simulado.
 3. **Moradores:** testar surgimento, autonomia, permissões e retorno para casa.
@@ -23,6 +25,6 @@ parecida com The Sims 3.
    save indevidamente e que uma troca de lote limpe os objetos temporários.
 5. **Compatibilidade:** testar em mundos diferentes e com atualizações do jogo.
 
-Nenhuma das etapas 1–5 foi implementada nesta versão. A demonstração de outro
-criador mostra uma direção promissora, mas não disponibiliza aqui suas APIs
-ou código-fonte. Nunca devemos anunciar 'mundo aberto pronto' sem teste real.
+Somente o começo experimental da etapa 1 foi implementado. O teste **ainda não
+foi executado dentro do jogo** e deve falhar de modo explícito caso uma API
+interna não aceite o objeto ou a posição. As etapas 2–5 seguem em aberto.
