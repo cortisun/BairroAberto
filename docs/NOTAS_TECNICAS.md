@@ -36,6 +36,11 @@ no GitHub, pois podem conter caminhos e informações de um computador pessoal.
 - Falta o primeiro log de execução in-game desta tentativa, especialmente
   para verificar `objects.system.create_object`, `routing.SurfaceIdentifier`,
   `sims4.math.Location` e a aceitação de posições fora do lote.
+- Log recebido em 27/10/2026: o jogo confirmou `Open Neighborhood 0.5.0 loaded`
+  e `python 3.7.0`. O arquivo continha chamadas antigas de `native_info` e
+  `class_api`, mas nenhuma entrada `capture_neighbor`, `captured`,
+  `preview_one` ou `preview_cleanup`. Portanto, ainda não há evidência
+  suficiente para afirmar que o teste de criação de móveis funcionou.
 
 ## Questão central ainda em aberto
 
