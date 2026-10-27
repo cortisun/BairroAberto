@@ -68,6 +68,22 @@ no GitHub, pois podem conter caminhos e informações de um computador pessoal.
 - A conclusão acima usa apenas um resumo do log; o log original e os IDs do
   save não foram incluídos no repositório público.
 
+## 0.5.2
+
+- Em Willow Creek, o log de jogo mostrou **98 objetos capturados** num segundo
+  lote, incluindo uma geladeira no índice `0`. A criação e remoção do preview
+  voltaram a ser confirmadas pelo motor do jogo.
+- O jogador relatou que consegue enxergar móveis por janelas de casas
+  vizinhas, mesmo quando elas não são o lote ativo. Isso pode ser o conteúdo
+  exibido pelo jogo ou a cópia experimental: não é possível diferenciar se
+  os dois ocupam exatamente a mesma posição.
+- O comando `on.preview_shift <indice> <dx> <dz>` tenta deslocar um único
+  preview até três metros nos eixos horizontais, preservando altura e rotação.
+  Ele não importa paredes, portas ou novas zonas; exige limpeza e teste em
+  save descartável.
+- Ainda falta a confirmação visual de uma cópia deslocada aparecendo fora do
+  lote ativo, e depois da possibilidade de interagir com ela.
+
 ## Questão central ainda em aberto
 
 Não basta uma zona vizinha aparecer no save ou no `ZoneManager`. Para uma casa

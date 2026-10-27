@@ -259,6 +259,31 @@ def preview_one(index: int = 0, _connection=None):
         diag.log_exception("preview_one", exc)
 
 
+@sims4.commands.Command("open_neighborhood.preview_shift", "on.preview_shift", command_type=LIVE)
+def preview_shift(index: int = 0, offset_x: int = 2, offset_z: int = 0, _connection=None):
+    """Create one visibly displaced off-lot copy, then remove with cleanup."""
+    output = _out(_connection)
+    try:
+        import services
+        if offset_x == 0 and offset_z == 0:
+            raise ValueError("use um deslocamento diferente de zero")
+        data = neighbor_preview.load_capture()
+        item = neighbor_preview.selected(data, index, services)
+        target = neighbor_preview.shifted_position(item, offset_x, offset_z)
+        obj = neighbor_preview.preview_one(data, index, services, offset_x, offset_z)
+        actual = _safe(lambda: [obj.position.x, obj.position.y, obj.position.z])
+        output("Copia deslocada criada (ID {}). Procure fora do local original.".format(
+            _safe(lambda: obj.id)))
+        output("Nao salve! Depois use on.preview_cleanup.")
+        diag.log("preview_shift:", "index={}".format(index),
+                 "offset_x={}".format(offset_x), "offset_z={}".format(offset_z),
+                 "target={}".format(target), "actual={}".format(actual),
+                 "id={}".format(_safe(lambda: obj.id)))
+    except Exception as exc:
+        output("preview_shift falhou: {!r}".format(exc))
+        diag.log_exception("preview_shift", exc)
+
+
 @sims4.commands.Command("open_neighborhood.preview_cleanup", "on.preview_cleanup", command_type=LIVE)
 def preview_cleanup(_connection=None):
     """Attempt removal of all objects created by THIS preview feature."""

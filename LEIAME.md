@@ -1,4 +1,4 @@
-# BairroAberto v0.5.1 — experimento de mobília entre lotes
+# BairroAberto v0.5.2 — experimento de mobília entre lotes
 
 Projeto original para tentar transformar bairros de **The Sims 4** em espaços
 contínuos como em The Sims 3: visitar casas comuns de vizinhos, sem tela de
@@ -22,6 +22,8 @@ ser rejeitado pelo motor do jogo. Nenhuma casa inteira é importada.
   de **um** objeto na zona ativa, com comando de limpeza.
 - `v0.5.1`: corrige flags expostas pelo jogo como funções e prioriza
   `ObjectManager.get_all()` na captura; descreve motivos de descarte.
+- `v0.5.2`: permite deslocar uma cópia de móvel em até 3 metros para distinguir
+  visualmente o objeto do mod de uma representação já mostrada pelo jogo.
 
 As branches `versoes/v...` preservam cada uma dessas versões no GitHub.
 Não temos um arquivo v0.1.0,
@@ -41,7 +43,7 @@ por isso a linha do tempo começa na v0.2.0.
 O ZIP de **código-fonte não vai diretamente em Mods**. Ele serve para gerar
 `.ts4script` compatível com Python 3.7. O script não depende da Community Library.
 
-## Teste da v0.5.1 (somente numa CÓPIA do save)
+## Teste da v0.5.2 (somente numa CÓPIA do save)
 
 **Risco experimental:** duplicatas podem permanecer gravadas se você salvar
 durante o teste ou se o jogo encerrar antes da limpeza. Faça backup de `saves`,
@@ -51,13 +53,14 @@ Não deixe crianças / Sims importantes interagirem com o preview.
 1. Entre normalmente na casa do vizinho que quer abrir. O deslocamento
    inicial ainda tem tela de carregamento.
 2. Abra o console (`Ctrl + Shift + C`) e digite `on.status` para confirmar a
-   versão `0.5.1`.
+   versão `0.5.2`.
 3. Ainda dentro da casa vizinha, execute `on.capture_neighbor`.
 4. Volte para sua casa normalmente e execute `on.captured`. A lista completa,
    com índices dos móveis, ficará em `Mods\OpenNeighborhood_diag.txt`.
-5. Escolha um índice na lista e execute `on.preview_one 0` (substitua `0` pelo
-   índice do objeto desejado). O mod tenta duplicar um único objeto na sua
-   posição original, fora do lote ativo.
+5. Escolha um índice na lista e execute `on.preview_shift 0 2 0` (substitua
+   `0` pelo índice do objeto desejado). O mod tenta duplicar um único objeto
+   dois metros ao lado da posição original, fora do lote ativo, para que a
+   cópia seja visivelmente diferente do móvel que já pode aparecer na janela.
 6. Observe o resultado, execute `on.preview_cleanup` e confirme que mostrou
    `nao removidos: 0`. **Encerre o jogo sem salvar** depois do experimento.
 7. Envie o `OpenNeighborhood_diag.txt` e descreva se o móvel apareceu, ficou
@@ -80,6 +83,7 @@ vizinho: só tenta criar um novo objeto na zona atual.
 | `on.capture_neighbor` | Guardar mobília do lote visitado |
 | `on.captured` | Listar objetos capturados e seus índices |
 | `on.preview_one <indice>` | Tentar instanciar UM objeto no espaço original |
+| `on.preview_shift <indice> <dx> <dz>` | Instanciar UM objeto deslocado (dx/dz de -3 a 3) |
 | `on.preview_cleanup` | Destruir apenas objetos experimentais criados pelo mod |
 
 ## Limites conhecidos
@@ -92,6 +96,9 @@ vizinho: só tenta criar um novo objeto na zona atual.
 - Nem todos os objetos podem ser recriados; APIs internas mudam entre patches.
 - A limpeza só acompanha objetos criados nesta sessão. Um travamento do jogo
   impede a limpeza, por isso a regra de **não salvar** é importante.
+- O teste de deslocamento pode colocar um móvel temporário sobre outra coisa,
+  atrás de uma parede ou fora da câmera. Isso não confirma por si só que a
+  renderização off-lot funcione ou falhe.
 - Passar nos testes locais prova apenas a lógica Python simulada; não confirma
   que o jogo aceitará criar objetos na zona ativa fora do lote.
 

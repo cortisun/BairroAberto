@@ -1,9 +1,9 @@
-# BairroAberto - experimental off-lot furnishing preview (v0.5.1)
+# BairroAberto - experimental off-lot furnishing preview (v0.5.2)
 #
 # Commands may capture objects and spawn one experimental preview when requested.
 # The import itself is wrapped so a failure is logged instead of breaking the loader.
 
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 
 try:
     from open_neighborhood import diag as _diag

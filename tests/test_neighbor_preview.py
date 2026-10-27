@@ -97,6 +97,17 @@ class PreviewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "examinados=0 via get_all"):
             preview.capture(services)
 
+    def test_shifted_copy_has_distinct_world_position(self):
+        item = preview.capture(MockServices())["objects"][0]
+        self.assertEqual(preview.shifted_position(item, 2, -1), [12.0, 2.0, 29.0])
+        self.assertEqual(preview.shifted_position(item), item["position"])
+
+    def test_shift_rejects_large_or_non_integer_offsets(self):
+        item = preview.capture(MockServices())["objects"][0]
+        for dx, dz in ((4, 0), (0, -4), (1.5, 0), (True, 0)):
+            with self.assertRaises(ValueError):
+                preview.shifted_position(item, dx, dz)
+
     def test_snapshot_rejects_corrupt_position(self):
         self.assertIsNone(preview.snapshot_object(MockObject(pos=(float("nan"), 0, 0))))
 

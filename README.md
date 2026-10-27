@@ -4,7 +4,7 @@ Projeto de mod de script **em desenvolvimento** para explorar um bairro
 contínuo em The Sims 4: caminhar até as casas comuns dos vizinhos e visitá-las
 sem telas de carregamento, como em The Sims 3.
 
-**Ainda não é um mundo aberto funcional.** A versão experimental atual, 0.5.1,
+**Ainda não é um mundo aberto funcional.** A versão experimental atual, 0.5.2,
 pode registrar definições e posições de móveis enquanto o jogador visita um
 lote e tentar recriar **um único objeto** fora do lote ativo depois. Paredes,
 portas, moradores, roteamento e visitas realmente sem loading ainda não foram
@@ -21,6 +21,7 @@ O histórico do repositório contém commits sequenciais para:
 | 0.4.0 | Inspeção segura de APIs de lote e zona | [`versoes/v0.4.0`](../../tree/versoes/v0.4.0) |
 | 0.5.0 | Captura e preview experimental de um móvel | [`versoes/v0.5.0`](../../tree/versoes/v0.5.0) |
 | 0.5.1 | Corrige a detecção de móveis no ObjectManager | [`versoes/v0.5.1`](../../tree/versoes/v0.5.1) |
+| 0.5.2 | Preview deslocado para testar a renderização fora do lote | [`versoes/v0.5.2`](../../tree/versoes/v0.5.2) |
 
 O código mais antigo disponível é a versão 0.2.0. Caminhos pessoais foram
 anonimizados ao importar seu arquivo de instruções antigo. Arquivos de log
@@ -53,3 +54,7 @@ em caso de nova falha. Em teste posterior, a v0.5.1 **capturou 132 objetos** e
 registrou **uma criação e remoção bem-sucedidas** na simulação. Ainda falta
 comprovar que a cópia aparece e pode ser usada fora do lote ativo. Consulte
 [notas técnicas](docs/NOTAS_TECNICAS.md) para o histórico dos experimentos.
+
+Na v0.5.2, `on.preview_shift 0 2 0` cria a cópia deslocada dois metros no
+eixo X, permitindo diferenciá-la de um móvel que o jogo já esteja exibindo.
+Remova-a com `on.preview_cleanup` e **não salve** depois do preview.

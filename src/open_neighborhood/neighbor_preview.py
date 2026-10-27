@@ -235,7 +235,7 @@ def cleanup():
     return removed, len(remaining)
 
 
-def preview_one(data, index, services):
+def preview_one(data, index, services, offset_x=0, offset_z=0):
     """Attempt one reversible, explicitly requested, off-lot object preview.
 
     The engine can reject off-lot objects and native APIs may vary by patch.
@@ -244,6 +244,7 @@ def preview_one(data, index, services):
     if _preview_objects:
         raise ValueError("use on.preview_cleanup antes de outra tentativa")
     item = selected(data, index, services)
+    xyz = shifted_position(item, offset_x, offset_z)
 
     from objects.system import create_object
     from objects.object_enums import ItemLocation
@@ -259,7 +260,6 @@ def preview_one(data, index, services):
     active_zone_id = services.current_zone_id()
     surface_type = routing.SurfaceType(item["surface_type"])
     surface = routing.SurfaceIdentifier(active_zone_id, item["level"], surface_type)
-    xyz = item["position"]
     q = item["rotation"]
     transform = Transform(Vector3(xyz[0], xyz[1], xyz[2]),
                           Quaternion(q[0], q[1], q[2], q[3]))
@@ -286,3 +286,12 @@ def preview_one(data, index, services):
 
 def preview_count():
     return len(_preview_objects)
+
+
+def shifted_position(record, offset_x=0, offset_z=0):
+    """Pure transform used to distinguish a generated copy from vanilla LOD."""
+    for value in (offset_x, offset_z):
+        if isinstance(value, bool) or not isinstance(value, int) or abs(value) > 3:
+            raise ValueError("deslocamento deve ser inteiro entre -3 e 3")
+    x, y, z = record["position"]
+    return [x + offset_x, y, z + offset_z]
