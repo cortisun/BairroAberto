@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+dist/
+.pytest_cache/
+*.ts4script
+OpenNeighborhood_diag*.txt
+OpenNeighborhood_capture.json
+*.bak
