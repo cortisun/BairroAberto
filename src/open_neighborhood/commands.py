@@ -5,7 +5,7 @@ import sys
 
 import sims4.commands
 
-from open_neighborhood import diag
+from open_neighborhood import diag, probe
 
 LIVE = sims4.commands.CommandType.Live
 
@@ -134,3 +134,38 @@ def zones(_connection=None):
     except Exception as exc:
         output("zones failed: {!r}".format(exc))
         diag.log_exception("zones", exc)
+
+
+@sims4.commands.Command("open_neighborhood.neighbors", "on.neighbors", command_type=LIVE)
+def neighbors(_connection=None):
+    """Report which neighboring lot records exist without loading them."""
+    output = _out(_connection)
+    try:
+        import services
+        report = probe.overview(services)
+        diag.log("neighbors:", *report)
+        for line in report[:12]:
+            output(line)
+        output("relatorio completo: {}".format(diag.log_path()))
+    except Exception as exc:
+        output("neighbors failed: {!r}".format(exc))
+        diag.log_exception("neighbors", exc)
+
+
+@sims4.commands.Command("open_neighborhood.inspect", "on.inspect", command_type=LIVE)
+def inspect_zone(target_zone_id: int = 0, _connection=None):
+    """Inspect a neighbor by its zone id, without loading or changing it."""
+    output = _out(_connection)
+    if target_zone_id <= 0:
+        output("Uso: on.inspect <ID_da_zona> (veja on.neighbors)")
+        return
+    try:
+        import services
+        report = probe.inspect_neighbor(services, target_zone_id)
+        diag.log("inspect:", *report)
+        for line in report[:10]:
+            output(line)
+        output("relatorio completo: {}".format(diag.log_path()))
+    except Exception as exc:
+        output("inspect failed: {!r}".format(exc))
+        diag.log_exception("inspect", exc)
