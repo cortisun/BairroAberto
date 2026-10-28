@@ -40,6 +40,7 @@ def status(_connection=None):
             "Open Neighborhood {} loaded".format(VERSION),
             "python {}".format(sys.version.split()[0]),
             "current_zone_id: {}".format(_safe(services.current_zone_id)),
+            "temporary_objects: {}".format(neighbor_preview.preview_count()),
             "log: {}".format(diag.log_path()),
         ]
         for line in lines:
@@ -291,3 +292,36 @@ def preview_cleanup(_connection=None):
     removed, remaining = neighbor_preview.cleanup()
     output("Previews removidos: {} | nao removidos: {}".format(removed, remaining))
     diag.log("preview_cleanup:", "removed={}".format(removed), "remaining={}".format(remaining))
+
+
+@sims4.commands.Command("open_neighborhood.open_neighbor", "on.open_neighbor", command_type=LIVE)
+def open_neighbor(count: int = 8, start_index: int = 0, _connection=None):
+    """Recreate a limited collection of recorded neighbor furnishings."""
+    output = _out(_connection)
+    try:
+        import services
+        data = neighbor_preview.load_capture()
+        report = neighbor_preview.open_neighbor(data, services, count, start_index)
+        output("Interior experimental: {} de {} moveis criados; {} falhas.".format(
+            report["created"], report["attempted"], report["failed"]))
+        output("NAO SALVE. Isto nao carrega paredes, portas ou Sims de outra zona.")
+        output("Para desfazer: on.close_neighbor")
+        diag.log("open_neighbor:", "source_zone={}".format(data["source_zone_id"]),
+                 "active_zone={}".format(services.current_zone_id()),
+                 "count={}".format(count), "start_index={}".format(start_index),
+                 "result={}".format(report))
+    except Exception as exc:
+        output("open_neighbor falhou: {!r}".format(exc))
+        output("Se houver copias temporarias, use on.close_neighbor. NAO SALVE.")
+        diag.log_exception("open_neighbor", exc)
+
+
+@sims4.commands.Command("open_neighborhood.close_neighbor", "on.close_neighbor", command_type=LIVE)
+def close_neighbor(_connection=None):
+    """Remove all tracked furnishing copies created by this script."""
+    output = _out(_connection)
+    removed, remaining = neighbor_preview.cleanup()
+    output("Interior experimental fechado: {} objetos removidos; {} pendentes.".format(
+        removed, remaining))
+    diag.log("close_neighbor:", "removed={}".format(removed),
+             "remaining={}".format(remaining))

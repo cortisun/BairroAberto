@@ -1,11 +1,11 @@
-# BairroAberto v0.5.2 — experimento de mobília entre lotes
+# BairroAberto v0.6.0 — montagem experimental do interior vizinho
 
 Projeto original para tentar transformar bairros de **The Sims 4** em espaços
 contínuos como em The Sims 3: visitar casas comuns de vizinhos, sem tela de
 carregamento. O alvo final continua sendo uma casa completa (móveis, paredes,
 portas, Sims e caminhos jogáveis), não apenas a vizinhança decorativa.
 
-**Estado atual: protótipo experimental, NÃO é um mod de bairro aberto.**
+**Estado atual: protótipo experimental, NÃO é um bairro aberto completo.**
 
 A v0.5.0 acrescentou o primeiro teste de criação real de objeto: visita-se uma
 casa vizinha normalmente uma vez, salva-se uma lista limitada de seus objetos,
@@ -24,6 +24,8 @@ ser rejeitado pelo motor do jogo. Nenhuma casa inteira é importada.
   `ObjectManager.get_all()` na captura; descreve motivos de descarte.
 - `v0.5.2`: permite deslocar uma cópia de móvel em até 3 metros para distinguir
   visualmente o objeto do mod de uma representação já mostrada pelo jogo.
+- `v0.6.0`: tenta reconstruir grupos de até 32 móveis, com fechamento e
+  remoção de todas as cópias temporárias.
 
 As branches `versoes/v...` preservam cada uma dessas versões no GitHub.
 Não temos um arquivo v0.1.0,
@@ -43,28 +45,31 @@ por isso a linha do tempo começa na v0.2.0.
 O ZIP de **código-fonte não vai diretamente em Mods**. Ele serve para gerar
 `.ts4script` compatível com Python 3.7. O script não depende da Community Library.
 
-## Teste da v0.5.2 (somente numa CÓPIA do save)
+## Teste da v0.6.0 (somente numa CÓPIA do save)
 
 **Risco experimental:** duplicatas podem permanecer gravadas se você salvar
 durante o teste ou se o jogo encerrar antes da limpeza. Faça backup de `saves`,
-use uma cópia do save e **não salve o jogo depois de executar preview_one**.
-Não deixe crianças / Sims importantes interagirem com o preview.
+use uma cópia do save e **não salve o jogo depois de executar open_neighbor**.
+Evite interagir com cópias temporárias durante a investigação.
 
 1. Entre normalmente na casa do vizinho que quer abrir. O deslocamento
    inicial ainda tem tela de carregamento.
 2. Abra o console (`Ctrl + Shift + C`) e digite `on.status` para confirmar a
-   versão `0.5.2`.
-3. Ainda dentro da casa vizinha, execute `on.capture_neighbor`.
+   versão `0.6.0`.
+3. Ainda dentro da casa vizinha, execute `on.capture_neighbor`, se o arquivo
+   `OpenNeighborhood_capture.json` não existir ou estiver desatualizado.
 4. Volte para sua casa normalmente e execute `on.captured`. A lista completa,
    com índices dos móveis, ficará em `Mods\OpenNeighborhood_diag.txt`.
-5. Escolha um índice na lista e execute `on.preview_shift 0 2 0` (substitua
-   `0` pelo índice do objeto desejado). O mod tenta duplicar um único objeto
-   dois metros ao lado da posição original, fora do lote ativo, para que a
-   cópia seja visivelmente diferente do móvel que já pode aparecer na janela.
-6. Observe o resultado, execute `on.preview_cleanup` e confirme que mostrou
-   `nao removidos: 0`. **Encerre o jogo sem salvar** depois do experimento.
-7. Envie o `OpenNeighborhood_diag.txt` e descreva se o móvel apareceu, ficou
-   invisível, ou se houve erro/crash. Isso permite corrigir a implementação.
+5. Execute `on.open_neighbor 8 0`: o mod tentará criar os oito primeiros
+   móveis registrados na zona ativa, nas posições da casa vizinha. Veja no
+   console quantos objetos foram realmente criados.
+6. Observe se os objetos estão visíveis atrás das janelas e se o Sim consegue
+   chegar até perto da casa. **Não salve**. Execute `on.close_neighbor` e
+   confira que os objetos pendentes chegaram a zero.
+7. Se o primeiro grupo funcionar, em uma nova sessão descartável teste
+   `on.open_neighbor 16 0` ou outro intervalo de até 32 objetos.
+8. Envie o `OpenNeighborhood_diag.txt` e diga se houve móveis visíveis,
+   invisíveis ou erros. As paredes/portas ainda não são importadas.
 
 `on.capture_neighbor` cria `Mods\OpenNeighborhood_capture.json`, que guarda
 somente IDs, posições e rotações dos objetos; não muda os móveis reais.
@@ -85,12 +90,14 @@ vizinho: só tenta criar um novo objeto na zona atual.
 | `on.preview_one <indice>` | Tentar instanciar UM objeto no espaço original |
 | `on.preview_shift <indice> <dx> <dz>` | Instanciar UM objeto deslocado (dx/dz de -3 a 3) |
 | `on.preview_cleanup` | Destruir apenas objetos experimentais criados pelo mod |
+| `on.open_neighbor <quantidade> <indice_inicial>` | Montar de 1 a 32 móveis temporários do vizinho |
+| `on.close_neighbor` | Remover todas as cópias do interior experimental |
 
 ## Limites conhecidos
 
 - Não há importação de arquitetura, paredes, portas, cobertura ou terrenos.
-- Uma cópia de móvel isolada **não** é uma casa visitável e pode não ter
-  caminho de interação fora do lote ativo.
+- Um conjunto de móveis **não** é uma casa visitável e pode não ter caminho
+  de interação fora do lote ativo.
 - Ainda não há chegada sem loading ao interior real: a visita inicial serve
   apenas para capturar o estado da casa. É uma etapa de investigação jogável.
 - Nem todos os objetos podem ser recriados; APIs internas mudam entre patches.

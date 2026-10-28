@@ -4,11 +4,12 @@ Projeto de mod de script **em desenvolvimento** para explorar um bairro
 contínuo em The Sims 4: caminhar até as casas comuns dos vizinhos e visitá-las
 sem telas de carregamento, como em The Sims 3.
 
-**Ainda não é um mundo aberto funcional.** A versão experimental atual, 0.5.2,
-pode registrar definições e posições de móveis enquanto o jogador visita um
-lote e tentar recriar **um único objeto** fora do lote ativo depois. Paredes,
-portas, moradores, roteamento e visitas realmente sem loading ainda não foram
-implementados. A criação do objeto também aguarda validação no jogo.
+**Ainda não é um mundo aberto funcional.** A versão experimental atual, 0.6.0,
+pode registrar móveis durante uma visita e tentar montar **até 32 objetos**
+do lote vizinho na zona ativa, de uma vez. Paredes, portas, moradores,
+roteamento e visitas realmente sem loading ainda não foram implementados.
+O jogo confirmou a criação e remoção de **um** objeto; a montagem de vários
+objetos ainda precisa de teste in-game.
 
 ## Versões preservadas
 
@@ -22,6 +23,7 @@ O histórico do repositório contém commits sequenciais para:
 | 0.5.0 | Captura e preview experimental de um móvel | [`versoes/v0.5.0`](../../tree/versoes/v0.5.0) |
 | 0.5.1 | Corrige a detecção de móveis no ObjectManager | [`versoes/v0.5.1`](../../tree/versoes/v0.5.1) |
 | 0.5.2 | Preview deslocado para testar a renderização fora do lote | [`versoes/v0.5.2`](../../tree/versoes/v0.5.2) |
+| 0.6.0 | Abertura experimental de um conjunto de móveis e limpeza conjunta | [`versoes/v0.6.0`](../../tree/versoes/v0.6.0) |
 
 O código mais antigo disponível é a versão 0.2.0. Caminhos pessoais foram
 anonimizados ao importar seu arquivo de instruções antigo. Arquivos de log
@@ -42,8 +44,8 @@ O nome interno `OpenNeighborhood` vem das primeiras versões do protótipo;
 o nome público deste projeto é **BairroAberto**.
 
 **Faça os testes apenas em uma cópia do save e não salve após executar**
-`on.preview_one` — o objeto criado é experimental e pode persistir se houver
-crash ou se o jogo for salvo antes da limpeza.
+`on.preview_one`, `on.preview_shift` ou `on.open_neighbor` — as cópias podem
+persistir se o jogo travar ou forem gravadas antes da limpeza.
 
 ## Estado mais recente dos testes
 
@@ -58,3 +60,13 @@ comprovar que a cópia aparece e pode ser usada fora do lote ativo. Consulte
 Na v0.5.2, `on.preview_shift 0 2 0` cria a cópia deslocada dois metros no
 eixo X, permitindo diferenciá-la de um móvel que o jogo já esteja exibindo.
 Remova-a com `on.preview_cleanup` e **não salve** depois do preview.
+
+Na v0.6.0, `on.open_neighbor 8 0` tenta instanciar oito móveis da casa
+vizinha nas posições originais, dentro da zona ativa. `on.close_neighbor`
+destrói todas as cópias temporárias rastreadas. A quantidade pode ser ajustada
+de 1 a 32; o segundo número é o índice inicial da captura. **Isso ainda não
+importa paredes ou caminhos internos e não torna a casa visitável por si só.**
+
+É necessário ter `OpenNeighborhood_capture.json` na pasta Mods. Se o arquivo
+sumiu após a instalação de outra versão, o mod agora informa como refazer a
+captura; atualizar o script não regenera sozinho os dados da casa vizinha.

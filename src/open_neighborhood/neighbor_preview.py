@@ -1,8 +1,8 @@
 """Experimental, opt-in furnishing bridge between two ordinary TS4 lots.
 
-Capture is read-only. A preview duplicates *one* definition into the current
-zone, at the recorded world coordinate. This does not load lot architecture,
-residents, or a second zone. Never treat the copies as a substitute for save data.
+Capture is read-only. Previews copy definitions into the active zone at their
+recorded world coordinates. They do not load walls, residents or a second zone.
+Never treat temporary copies as a substitute for real lot/save data.
 """
 import json
 import math
@@ -14,6 +14,7 @@ CAPTURE_NAME = "OpenNeighborhood_capture.json"
 FORMAT_VERSION = 1
 MAX_OBJECTS = 256
 MAX_CAPTURE_BYTES = 240000
+MAX_OPEN_OBJECTS = 32
 
 _preview_objects = []
 
@@ -193,6 +194,9 @@ def save_capture(data):
 
 def load_capture():
     path = capture_path()
+    if not os.path.isfile(path):
+        raise ValueError("captura ausente; visite o lote vizinho e use "
+                         "on.capture_neighbor antes de voltar para casa")
     if os.stat(path).st_size > MAX_CAPTURE_BYTES:
         raise ValueError("arquivo de captura acima do limite")
     with open(path, "r", encoding="utf-8") as target:
@@ -242,8 +246,16 @@ def preview_one(data, index, services, offset_x=0, offset_z=0):
     Never mutate the source neighbor objects or their persistent records.
     """
     if _preview_objects:
-        raise ValueError("use on.preview_cleanup antes de outra tentativa")
+        raise ValueError("use on.close_neighbor ou on.preview_cleanup antes de outra tentativa")
     item = selected(data, index, services)
+    return _create_preview(item, services, offset_x, offset_z)
+
+
+def _create_preview(item, services, offset_x=0, offset_z=0):
+    """Create and track one temporary object; roll it back on placement error.
+
+    Caller must validate the neighbor data and requested indices beforehand.
+    """
     xyz = shifted_position(item, offset_x, offset_z)
 
     from objects.system import create_object
@@ -282,6 +294,52 @@ def preview_one(data, index, services, offset_x=0, offset_z=0):
         raise
     _preview_objects.append(obj)
     return obj
+
+
+def open_neighbor(data, services, count=8, start_index=0):
+    """Stage a BOUNDED group of furnishings in the active zone.
+
+    This is an experimental furnishing phase, not an opened second lot. Each
+    successful copy is tracked for explicit cleanup. Unsupported definitions
+    fail independently so one broken chair needn't abort the entire batch.
+    """
+    if _preview_objects:
+        raise ValueError("ja existem copias; use on.close_neighbor antes de abrir de novo")
+    if isinstance(count, bool) or not isinstance(count, int) or not 1 <= count <= MAX_OPEN_OBJECTS:
+        raise ValueError("quantidade deve ficar entre 1 e {}".format(MAX_OPEN_OBJECTS))
+    if isinstance(start_index, bool) or not isinstance(start_index, int):
+        raise ValueError("indice inicial invalido")
+    selected(data, start_index, services)
+
+    items = data["objects"][start_index:start_index + count]
+    failures = []
+    created = 0
+    for offset, item in enumerate(items):
+        index = start_index + offset
+        try:
+            obj = _create_preview(item, services)
+            created += 1
+            try:
+                p = obj.position
+                actual = [round(float(p.x), 3), round(float(p.y), 3), round(float(p.z), 3)]
+            except Exception:
+                actual = "indisponivel"
+            diag.log("open_neighbor created:", "index={}".format(index),
+                     "id={}".format(getattr(obj, "id", "?")),
+                     "target={}".format(item["position"]),
+                     "actual={}".format(actual))
+        except Exception as exc:
+            failures.append((index, type(exc).__name__))
+            diag.log_exception("open_neighbor item {}".format(index), exc)
+    result = {"attempted": len(items), "created": created,
+              "failed": len(failures), "failed_items": failures[:8],
+              "first_index": start_index, "last_index": start_index + len(items) - 1,
+              "tracked": len(_preview_objects)}
+    if not created:
+        raise RuntimeError("nenhum movel foi criado; falhas={} indices={} "
+                           "(veja o log e use on.close_neighbor)".format(
+                               len(failures), failures[:8]))
+    return result
 
 
 def preview_count():

@@ -3,7 +3,7 @@
 # Commands may capture objects and spawn one experimental preview when requested.
 # The import itself is wrapped so a failure is logged instead of breaking the loader.
 
-VERSION = "0.5.2"
+VERSION = "0.6.0"
 
 try:
     from open_neighborhood import diag as _diag

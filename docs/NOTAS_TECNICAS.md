@@ -84,6 +84,21 @@ no GitHub, pois podem conter caminhos e informações de um computador pessoal.
 - Ainda falta a confirmação visual de uma cópia deslocada aparecendo fora do
   lote ativo, e depois da possibilidade de interagir com ela.
 
+## 0.6.0 — montagem experimental (ainda sem teste no jogo)
+
+- O último diagnóstico da v0.5.2 mostrou a ausência de
+  `OpenNeighborhood_capture.json` no diretório Mods. Por isso,
+  `on.captured` e `on.preview_shift` falharam antes da criação de qualquer
+  objeto; `on.preview_cleanup` removeu zero objetos corretamente.
+- A v0.6.0 apresenta um erro mais claro quando a captura está ausente.
+- `on.open_neighbor <quantidade> <indice_inicial>` tenta reconstruir um lote
+  de móveis, com limite de 32 objetos por sessão experimental e diagnóstico
+  por índice para falhas de definição/posição.
+- `on.close_neighbor` destrói somente objetos criados e rastreados pelo mod.
+  Nenhum objeto existente no lote vizinho é removido por esse comando.
+- Os testes locais cobrem limite, tratamento de falhas parciais, limpeza e
+  captura ausente, mas ainda não provam renderização fora do lote nem rotas.
+
 ## Questão central ainda em aberto
 
 Não basta uma zona vizinha aparecer no save ou no `ZoneManager`. Para uma casa

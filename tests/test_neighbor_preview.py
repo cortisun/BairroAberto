@@ -146,6 +146,66 @@ class PreviewTests(unittest.TestCase):
         self.assertTrue(created.destroyed)
         self.assertFalse(untouched.destroyed)
 
+    def test_missing_capture_explains_how_to_rebuild_it(self):
+        with tempfile.TemporaryDirectory() as temp:
+            missing = os.path.join(temp, "missing.json")
+            with mock.patch.object(preview, "capture_path", return_value=missing):
+                with self.assertRaisesRegex(ValueError, "on.capture_neighbor"):
+                    preview.load_capture()
+
+    def test_open_neighbor_rebuilds_small_group_and_cleans_up(self):
+        data = preview.capture(MockServices())
+        first = dict(data["objects"][0])
+        bad = dict(first, definition_id=999)
+        last = dict(first, definition_id=456)
+        data["objects"] = [first, bad, last]
+        made = []
+
+        class Created:
+            def __init__(self, number):
+                self.id = number
+                self.destroyed = False
+
+            def destroy(self, **kwargs):
+                self.destroyed = True
+
+        def fake_spawn(item, services, offset_x=0, offset_z=0):
+            if item["definition_id"] == 999:
+                raise ValueError("unavailable definition")
+            obj = Created(item["definition_id"])
+            made.append(obj)
+            preview._preview_objects.append(obj)
+            return obj
+
+        with mock.patch.object(preview, "_create_preview", side_effect=fake_spawn):
+            result = preview.open_neighbor(data, MockServices(zone_id=400), count=3)
+        self.assertEqual(result["attempted"], 3)
+        self.assertEqual(result["created"], 2)
+        self.assertEqual(result["failed"], 1)
+        self.assertEqual(result["failed_items"], [(1, "ValueError")])
+        self.assertEqual(preview.preview_count(), 2)
+        self.assertEqual(preview.cleanup(), (2, 0))
+        self.assertTrue(all(obj.destroyed for obj in made))
+
+    def test_open_neighbor_rejects_overlaps_and_unbounded_batches(self):
+        data = preview.capture(MockServices())
+        home = MockServices(zone_id=400)
+        for count in (0, -1, preview.MAX_OPEN_OBJECTS + 1, 1.5, True):
+            with self.assertRaises(ValueError):
+                preview.open_neighbor(data, home, count=count)
+        with self.assertRaises(ValueError):
+            preview.open_neighbor(data, home, start_index=10)
+        preview._preview_objects = [object()]
+        with self.assertRaisesRegex(ValueError, "on.close_neighbor"):
+            preview.open_neighbor(data, home)
+
+    def test_open_neighbor_no_success_does_not_claim_open(self):
+        data = preview.capture(MockServices())
+        with mock.patch.object(preview, "_create_preview", side_effect=RuntimeError("fail")):
+            with self.assertRaisesRegex(RuntimeError, "nenhum movel foi criado"):
+                preview.open_neighbor(data, MockServices(zone_id=400), count=1)
+        self.assertEqual(preview.preview_count(), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
